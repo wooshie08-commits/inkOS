@@ -366,6 +366,23 @@ object EditModeHelper {
                                         }
                                     )
                                 }
+
+                                SettingRow(label = stringResource(R.string.second_clock_timezone), value = SecondClockZones.shortLabel(uiState.secondClockTimezoneId)) {
+                                    currentSheet?.dismiss()
+                                    val zoneIds = SecondClockZones.idsWithOff()
+                                    val options = zoneIds.map { SecondClockZones.displayLabel(context, it) }
+                                    dialogManager.showSingleChoiceDialog(
+                                        context = context,
+                                        options = options.toTypedArray(),
+                                        titleResId = R.string.second_clock_timezone,
+                                        selectedIndex = zoneIds.indexOf(uiState.secondClockTimezoneId).coerceAtLeast(0),
+                                        onItemSelected = { label ->
+                                            val index = options.indexOf(label)
+                                            vm.setSecondClockTimezone(if (index > 0) zoneIds[index] else "")
+                                            onUpdate()
+                                        }
+                                    )
+                                }
                             }
                         }
                     }

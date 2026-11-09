@@ -94,6 +94,7 @@ private const val SHOW_SECOND_CLOCK = "SHOW_SECOND_CLOCK"
 private const val CLOCK_MODE = "CLOCK_MODE"
 private const val CLOCK_STYLE = "CLOCK_STYLE"
 private const val SECOND_CLOCK_OFFSET_HOURS = "SECOND_CLOCK_OFFSET_HOURS"
+private const val SECOND_CLOCK_TIMEZONE = "SECOND_CLOCK_TIMEZONE"
 
 // App Drawer specific preferences
 private const val APP_DRAWER_APPS_PER_PAGE_CACHE = "APP_DRAWER_APPS_PER_PAGE_CACHE"
@@ -322,7 +323,7 @@ class Prefs(val context: Context) {
         "APP_DRAWER_AUTO_LAUNCH", "APP_DRAWER_AUTO_SHOW_KEYBOARD",
         "APP_DRAWER_AZ_FILTER", "APP_DRAWER_PAGER",
         SHOW_CLOCK, CLOCK_MODE, CLOCK_STYLE, SHOW_AM_PM, SHOW_SECOND_CLOCK,
-        SECOND_CLOCK_OFFSET_HOURS, "SHOW_DATE_BATTERY_COMBO", "SHOW_NOTIFICATION_COUNT", "NOTIFICATION_COUNT_SOURCE", "DATE_FORMAT_STYLE",
+        SECOND_CLOCK_OFFSET_HOURS, SECOND_CLOCK_TIMEZONE, "SHOW_DATE_BATTERY_COMBO", "SHOW_NOTIFICATION_COUNT", "NOTIFICATION_COUNT_SOURCE", "DATE_FORMAT_STYLE",
         Constants.PrefKeys.BOTTOM_WIDGET_TYPE, QUOTE_TEXT, "top_widget_margin", "bottom_widget_margin",
         TEXT_ISLANDS, TEXT_ISLANDS_INVERTED, TEXT_ISLANDS_SHAPE,
         "SHOW_DATE", SHOW_QUOTE, SMALL_CAPS_APPS, ALL_CAPS_APPS,
@@ -946,6 +947,11 @@ class Prefs(val context: Context) {
     var secondClockOffsetHours: Int
         get() = prefs.getInt(SECOND_CLOCK_OFFSET_HOURS, 0)
         set(value) = prefs.edit { putInt(SECOND_CLOCK_OFFSET_HOURS, value.coerceIn(-12, 14)) }
+
+    /** Blank means "no timezone chosen; use the fixed offset hours". Non-blank is an IANA zone id. */
+    var secondClockTimezoneId: String
+        get() = prefs.getString(SECOND_CLOCK_TIMEZONE, "") ?: ""
+        set(value) = prefs.edit { putString(SECOND_CLOCK_TIMEZONE, value) }
 
     var showAudioWidgetEnabled: Boolean
         get() = prefs.getBoolean(SHOW_AUDIO_WIDGET_ENABLE, false)

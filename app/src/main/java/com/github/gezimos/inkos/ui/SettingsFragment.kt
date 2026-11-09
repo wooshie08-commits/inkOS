@@ -99,6 +99,7 @@ import com.github.gezimos.inkos.data.Prefs
 import com.github.gezimos.inkos.helper.CalendarEventsHelper
 import com.github.gezimos.inkos.helper.IconPackUtility
 import com.github.gezimos.inkos.helper.IconUtility
+import com.github.gezimos.inkos.helper.SecondClockZones
 import com.github.gezimos.inkos.helper.ShapeHelper
 import com.github.gezimos.inkos.helper.getHexForOpacity
 import com.github.gezimos.inkos.helper.getTrueSystemFont
@@ -1026,6 +1027,26 @@ class SettingsFragment : Fragment() {
                     onClick = {
                         dialogBuilder.showSliderDialog(requireContext(), getString(R.string.second_clock_offset),
                             -12, 14, homeUiState.secondClockOffsetHours) { viewModel.setSecondClockOffsetHours(it) }
+                    }
+                )
+                SettingsSelect(
+                    title = stringResource(R.string.second_clock_timezone),
+                    option = SecondClockZones.displayLabel(requireContext(), homeUiState.secondClockTimezoneId),
+                    fontSize = titleFontSize,
+                    description = stringResource(R.string.desc_second_clock_timezone),
+                    onClick = {
+                        val zoneIds = SecondClockZones.idsWithOff()
+                        val options = zoneIds.map { SecondClockZones.displayLabel(requireContext(), it) }
+                        dialogBuilder.showSingleChoiceDialog(
+                            requireContext(),
+                            options.toTypedArray(),
+                            R.string.second_clock_timezone,
+                            selectedIndex = zoneIds.indexOf(homeUiState.secondClockTimezoneId).coerceAtLeast(0),
+                            onItemSelected = { label ->
+                                val index = options.indexOf(label)
+                                viewModel.setSecondClockTimezone(if (index > 0) zoneIds[index] else "")
+                            }
+                        )
                     }
                 )
             }

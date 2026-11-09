@@ -4324,6 +4324,7 @@ data class HomeUiRenderState(
     val secondClockText: String,
     val secondAmPmText: String,
     val secondClockOffsetHours: Int,
+    val secondClockTimezoneId: String = "",
     val allCapsApps: Boolean,
     val smallCapsApps: Boolean,
     val showNotificationBadge: Boolean,

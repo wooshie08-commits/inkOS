@@ -139,6 +139,7 @@ object Constants {
         const val CLOCK_MODE = "CLOCK_MODE"
         const val CLOCK_STYLE = "CLOCK_STYLE"
         const val SECOND_CLOCK_OFFSET_HOURS = "SECOND_CLOCK_OFFSET_HOURS"
+        const val SECOND_CLOCK_TIMEZONE = "SECOND_CLOCK_TIMEZONE"
         const val SHOW_CLOCK = "SHOW_CLOCK"
         const val SHOW_DATE_BATTERY_COMBO = "SHOW_DATE_BATTERY_COMBO"
         const val SHOW_NOTIFICATION_COUNT = "SHOW_NOTIFICATION_COUNT"

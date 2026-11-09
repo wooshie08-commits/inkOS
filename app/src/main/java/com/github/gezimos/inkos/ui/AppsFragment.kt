@@ -395,7 +395,7 @@ class AppsFragment : Fragment() {
                 val settingsSearchResults by remember {
                     derivedStateOf {
                         val q = state.searchQuery.text
-                        if (q.isBlank()) emptyList()
+                        if (q.isBlank() || !appsDrawer.appDrawerSearchSettingsEnabled) emptyList()
                         else com.github.gezimos.inkos.helper.SettingsSearchHelper.search(q)
                     }
                 }

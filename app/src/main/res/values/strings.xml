@@ -153,6 +153,8 @@
     <string name="show_am_pm">Show AM/PM</string>
     <string name="dual_clocks">Dual Clocks</string>
     <string name="second_clock_offset">Second clock offset</string>
+    <string name="second_clock_timezone">Second clock timezone</string>
+    <string name="second_clock_timezone_off">Off — use offset hours</string>
 
     <!-- Date row -->
     <string name="date_format">Date Format</string>
@@ -708,6 +710,7 @@
     <string name="desc_show_am_pm">Display AM/PM on the clock</string>
     <string name="desc_dual_clocks">Dual clocks with timezone</string>
     <string name="desc_second_clock_offset">Set time zone difference</string>
+    <string name="desc_second_clock_timezone">Pick a place instead of a fixed offset (stays correct across DST changes)</string>
     <string name="desc_clock_alignment">Align clock</string>
     <string name="desc_show_date">Show date on home</string>
     <string name="desc_date_format">Date display format</string>

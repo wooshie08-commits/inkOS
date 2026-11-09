@@ -46,6 +46,7 @@ data class HomeUiState(
     val showAmPm: Boolean = true,
     val showSecondClock: Boolean = false,
     val secondClockOffsetHours: Int = 0,
+    val secondClockTimezoneId: String = "",
     val quoteText: String = "",
     val showAudioWidget: Boolean = false,
     val homeAppsNum: Int = 8,
@@ -381,6 +382,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         showAmPm = prefs.showAmPm,
         showSecondClock = prefs.showSecondClock,
         secondClockOffsetHours = prefs.secondClockOffsetHours,
+        secondClockTimezoneId = prefs.secondClockTimezoneId,
         quoteText = prefs.quoteText,
         showAudioWidget = prefs.showAudioWidgetEnabled,
         homeAppsNum = prefs.homeAppsNum,
@@ -642,6 +644,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             secondClockText = clock.secondClockText,
             secondAmPmText = clock.secondAmPmText,
             secondClockOffsetHours = homeUi.secondClockOffsetHours,
+            secondClockTimezoneId = homeUi.secondClockTimezoneId,
             allCapsApps = homeUi.allCapsApps,
             smallCapsApps = homeUi.smallCapsApps,
             showNotificationBadge = homeUi.showNotificationBadge,
@@ -735,6 +738,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             secondClockText = "",
             secondAmPmText = "",
             secondClockOffsetHours = 0,
+            secondClockTimezoneId = "",
             allCapsApps = false,
             smallCapsApps = false,
             showNotificationBadge = false,
@@ -972,6 +976,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             PrefKeys.SHOW_AM_PM -> currentState.copy(showAmPm = prefs.showAmPm)
             PrefKeys.SHOW_SECOND_CLOCK -> currentState.copy(showSecondClock = prefs.showSecondClock)
             PrefKeys.SECOND_CLOCK_OFFSET_HOURS -> currentState.copy(secondClockOffsetHours = prefs.secondClockOffsetHours)
+            PrefKeys.SECOND_CLOCK_TIMEZONE -> currentState.copy(secondClockTimezoneId = prefs.secondClockTimezoneId)
             PrefKeys.CLOCK_MODE -> currentState.copy(clockMode = prefs.clockMode)
             PrefKeys.CLOCK_STYLE -> currentState.copy(clockStyle = prefs.clockStyle)
             PrefKeys.SHOW_DATE_BATTERY_COMBO -> currentState.copy(showDateBatteryCombo = prefs.showDateBatteryCombo)
@@ -1112,17 +1117,36 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         var secondAmPmText = ""
         if (_homeUiState.value.showSecondClock) {
             try {
-                val cal = java.util.Calendar.getInstance()
-                cal.time = now
-                cal.add(java.util.Calendar.HOUR_OF_DAY, _homeUiState.value.secondClockOffsetHours)
-                secondClockText = timeFormatter.format(cal.time)
-                secondAmPmText = if (effectiveIs24Hour || !_homeUiState.value.showAmPm) {
-                    ""
+                val timezoneId = _homeUiState.value.secondClockTimezoneId
+                val zone = if (timezoneId.isNotBlank()) java.util.TimeZone.getTimeZone(timezoneId) else null
+                if (zone != null && zone.id == timezoneId) {
+                    // A real zone id was chosen: format "now" in that zone, so DST is always
+                    // correct — no fixed hour offset to go stale.
+                    val zoneFormatter = java.text.SimpleDateFormat(clockPattern, java.util.Locale.getDefault())
+                    zoneFormatter.timeZone = zone
+                    secondClockText = zoneFormatter.format(now)
+                    if (!effectiveIs24Hour && _homeUiState.value.showAmPm) {
+                        secondAmPmText = try {
+                            val amPmFormatter = java.text.SimpleDateFormat("a", java.util.Locale.getDefault())
+                            amPmFormatter.timeZone = zone
+                            amPmFormatter.format(now)
+                        } catch (_: Exception) {
+                            ""
+                        }
+                    }
                 } else {
-                    try {
-                        java.text.SimpleDateFormat("a", java.util.Locale.getDefault()).format(cal.time)
-                    } catch (_: Exception) {
+                    val cal = java.util.Calendar.getInstance()
+                    cal.time = now
+                    cal.add(java.util.Calendar.HOUR_OF_DAY, _homeUiState.value.secondClockOffsetHours)
+                    secondClockText = timeFormatter.format(cal.time)
+                    secondAmPmText = if (effectiveIs24Hour || !_homeUiState.value.showAmPm) {
                         ""
+                    } else {
+                        try {
+                            java.text.SimpleDateFormat("a", java.util.Locale.getDefault()).format(cal.time)
+                        } catch (_: Exception) {
+                            ""
+                        }
                     }
                 }
             } catch (_: Exception) {
@@ -1421,6 +1445,22 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             updateClockState()
         } catch (e: Exception) {
             android.util.Log.w("MainViewModel", "setSecondClockOffsetHours: updateClockState failed", e)
+        }
+    }
+
+    /**
+     * Secondary clock timezone. An empty id falls back to the fixed offset hours. Unknown zone
+     * ids are ignored, and a stored invalid value falls back to the offset path at read time.
+     */
+    fun setSecondClockTimezone(id: String) {
+        val safeId = id.trim()
+        if (safeId.isNotBlank() && java.util.TimeZone.getTimeZone(safeId).id != safeId) return
+        prefs.secondClockTimezoneId = safeId
+        _homeUiState.value = _homeUiState.value.copy(secondClockTimezoneId = safeId)
+        try {
+            updateClockState()
+        } catch (e: Exception) {
+            android.util.Log.w("MainViewModel", "setSecondClockTimezone: updateClockState failed", e)
         }
     }
 
